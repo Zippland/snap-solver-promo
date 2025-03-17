@@ -619,8 +619,43 @@
             </div>
             <div class="copyright">
                 <p>&copy; 2024 Snap-Solver. 基于 <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank">MIT 许可证</a> 开源</p>
+                <p>网站访问量: <span id="visitor-count">--</span></p>
             </div>
         </div>
     </footer>
+    
+    <!-- 访问量计数器 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 这里使用Firebase或者其他后端服务存储访问量数据
+            // 下面是一个模拟示例，实际实现需要后端支持
+            
+            // 从localStorage获取上次保存的计数
+            let count = localStorage.getItem('visitorCount') || 0;
+            
+            // 增加计数
+            count = parseInt(count) + 1;
+            
+            // 保存回localStorage
+            localStorage.setItem('visitorCount', count);
+            
+            // 显示在页面上
+            document.getElementById('visitor-count').textContent = count;
+            
+            // 注意：这只是一个前端模拟，实际上每个用户都会有自己的计数
+            // 真实场景需要使用后端API来存储和获取全局访问量
+        });
+    </script>
+    
+    <!-- 百度统计 -->
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // 这里需要替换为您的百度统计ID
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 </body>
 </html> 

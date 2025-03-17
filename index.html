@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snap-Solver - AI笔试测评工具</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 不蒜子访问统计 -->
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <style>
         :root {
             --primary: #2196F3;
@@ -42,6 +40,15 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+        }
+
+        .open-source-banner {
+            background-color: var(--success);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
         }
 
         /* 头部样式 */
@@ -164,7 +171,7 @@
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
         .feature-icon {
@@ -457,14 +464,38 @@
         .xiaohongshu-icon {
             color: var(--accent);
         }
+
+        .highlight-card {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.2) 100%);
+            border: 2px solid var(--success);
+            position: relative;
+        }
+
+        .highlight-card::before {
+            content: "免费";
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <!-- 头部 -->
+    <div class="open-source-banner">
+        <div class="container">
+            ⭐ Snap-Solver 是100%免费开源的AI笔试测评工具，欢迎使用与贡献 ⭐
+        </div>
+    </div>
+
     <header>
         <div class="container header-content">
-            <h1>Snap-Solver</h1>
-            <p>一键识别，自动解答 — 你的AI笔试测评工具</p>
+            <h1>Snap-Solver <span style="font-size: 0.7em; vertical-align: super; color: #FFEB3B;">免费开源</span></h1>
+            <p>AI驱动的笔试题智能解答工具，让编程测评不再有压力</p>
             <div>
                 <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">立即体验</a>
                 <a href="#features" class="btn-secondary">了解更多</a>
@@ -522,6 +553,13 @@
                     </div>
                     <h3>全平台支持</h3>
                     <p>Windows、MacOS、Linux 系统可用，手机端可通过浏览器访问，随时随地使用</p>
+                </div>
+                <div class="feature-card highlight-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3>100% 免费开源</h3>
+                    <p>基于MIT许可证完全开源，免费使用，无任何隐藏收费，欢迎贡献和改进</p>
                 </div>
             </div>
         </div>
@@ -621,15 +659,6 @@
             </div>
             <div class="copyright">
                 <p>&copy; 2024 Snap-Solver. 基于 <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank">MIT 许可证</a> 开源</p>
-                <p>
-                    <span id="busuanzi_container_site_pv" style="display: inline;">
-                        总访问量: <span id="busuanzi_value_site_pv"></span> 次
-                    </span>
-                    <span style="margin: 0 10px;">|</span>
-                    <span id="busuanzi_container_site_uv" style="display: inline;">
-                        访客数: <span id="busuanzi_value_site_uv"></span> 人
-                    </span>
-                </p>
             </div>
         </div>
     </footer>

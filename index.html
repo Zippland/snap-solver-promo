@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap-Solver - AI笔试测评工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --secondary: #4CAF50;
+            --background: #f9fafb;
+            --text: #333333;
+            --text-light: #666666;
+            --surface: #ffffff;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --danger: #F44336;
+            --accent: #ff2442;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--background);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background-color: white;
+            color: var(--primary);
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg"><path d="M0,64L80,69.3C160,75,320,85,480,85.3C640,85,800,75,960,58.7C1120,43,1280,21,1360,10.7L1440,0L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" fill="white"/></svg>');
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 特性部分 */
+        .features {
+            padding: 80px 0;
+            background-color: var(--surface);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--surface);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px var(--shadow);
+            padding: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(33, 150, 243, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+        }
+
+        /* 工作流程 */
+        .workflow {
+            padding: 80px 0;
+            background-color: #f5f8fb;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .workflow-steps::before {
+            content: "";
+            position: absolute;
+            top: 40px;
+            left: 30px;
+            right: 30px;
+            height: 4px;
+            background-color: var(--border);
+            z-index: 1;
+        }
+
+        .workflow-step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-width: 180px;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
+        }
+
+        .workflow-step h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .workflow-step p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* 演示部分 */
+        .demo {
+            padding: 80px 0;
+            background-color: var(--surface);
+        }
+
+        .demo-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .demo-content {
+            flex: 1;
+        }
+
+        .demo-image {
+            flex: 1;
+            text-align: center;
+        }
+
+        .demo-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .demo-image img:hover {
+            transform: scale(1.03);
+        }
+
+        .demo-content h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .demo-content p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .check-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .check-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .check-list li i {
+            color: var(--success);
+            margin-right: 10px;
+            margin-top: 4px;
+        }
+
+        /* CTA部分 */
+        .cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+        }
+
+        /* 底部 */
+        footer {
+            background-color: #1a1a2e;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 60px 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .footer-column {
+            margin-bottom: 30px;
+            min-width: 200px;
+        }
+
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-column p {
+            margin-bottom: 15px;
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        .social-links {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-link {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-link i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .copyright a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .copyright a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 36px;
+            }
+            header p {
+                font-size: 16px;
+            }
+            .demo-container {
+                flex-direction: column;
+            }
+            .workflow-steps {
+                flex-direction: column;
+                gap: 30px;
+                align-items: center;
+            }
+            .workflow-steps::before {
+                width: 4px;
+                height: 100%;
+                left: 50%;
+                top: 0;
+                transform: translateX(-50%);
+                right: auto;
+            }
+            .footer-content {
+                flex-direction: column;
+            }
+            .btn-primary, .btn-secondary {
+                display: block;
+                margin: 10px auto;
+                max-width: 200px;
+            }
+        }
+
+        /* 特殊样式 */
+        .xiaohongshu-icon {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header>
+        <div class="container header-content">
+            <h1>Snap-Solver</h1>
+            <p>一键识别，自动解答 — 你的AI笔试测评工具</p>
+            <div>
+                <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">立即体验</a>
+                <a href="#features" class="btn-secondary">了解更多</a>
+            </div>
+        </div>
+        <div class="wave"></div>
+    </header>
+
+    <!-- 特性部分 -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>强大功能</h2>
+                <p>Snap-Solver提供多种强大功能，帮助您轻松应对各类笔试测评</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>一键截图</h3>
+                    <p>使用快捷键（Alt+Ctrl+S，可自定义）即可远程监控电脑屏幕，方便快捷</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3>局域网共享</h3>
+                    <p>一处部署，多处使用，同一网络下所有设备均可访问，提高团队协作效率</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>OCR 文字识别</h3>
+                    <p>支持 Mathpix API 识别数学公式和图片中的文字，精准率高</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>多模型支持</h3>
+                    <p>同时支持 GPT-4o、Claude-3.7 和 DeepSeek 等多种 AI 模型，满足不同需求</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>VPN 代理支持</h3>
+                    <p>可自定义 VPN 代理，支持国内用户通过代理访问 AI 模型，畅通无阻</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>全平台支持</h3>
+                    <p>Windows、MacOS、Linux 系统可用，手机端可通过浏览器访问，随时随地使用</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工作流程 -->
+    <section class="workflow">
+        <div class="container">
+            <div class="section-title">
+                <h2>使用流程</h2>
+                <p>简单几步，轻松解答复杂问题</p>
+            </div>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <h3>部署启动</h3>
+                    <p>安装依赖，启动应用，获取本地IP地址</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <h3>截取题目</h3>
+                    <p>按下快捷键，截取电脑屏幕上的题目图像</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <h3>识别分析</h3>
+                    <p>系统自动识别图像中的文字并进行分析</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <h3>获取解答</h3>
+                    <p>AI给出详细解答，包含思考过程和最终答案</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 演示部分 -->
+    <section class="demo">
+        <div class="container demo-container">
+            <div class="demo-content">
+                <h2>为什么选择 Snap-Solver？</h2>
+                <p>Snap-Solver 不仅仅是一个解题工具，它是您学习和工作的得力助手</p>
+                <ul class="check-list">
+                    <li><i class="fas fa-check-circle"></i>完全开源，免费使用，无任何隐藏收费</li>
+                    <li><i class="fas fa-check-circle"></i>操作简单，即使是技术小白也能快速上手</li>
+                    <li><i class="fas fa-check-circle"></i>支持多种 AI 模型，确保答案准确性和多样性</li>
+                    <li><i class="fas fa-check-circle"></i>支持数学公式识别，科学计算难题也能轻松应对</li>
+                    <li><i class="fas fa-check-circle"></i>团队协作功能，多设备共享，提高学习效率</li>
+                </ul>
+                <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">查看源码</a>
+            </div>
+            <div class="demo-image">
+                <img src="images/demo.png" alt="Snap-Solver 演示" onerror="this.src='https://via.placeholder.com/450x300/1976D2/FFFFFF?text=Snap-Solver'">
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA部分 -->
+    <section class="cta">
+        <div class="container">
+            <h2>立即开始使用 Snap-Solver</h2>
+            <p>无论是学习中的复杂问题，还是工作中的专业难题，Snap-Solver 都能为您提供支持。完全开源，免费使用，快来体验！</p>
+            <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">⭐ GitHub 仓库</a>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>关于 Snap-Solver</h3>
+                    <p>Snap-Solver 是一个强大的 AI 笔试测评工具，帮助用户快速解答各类问题。完全开源，免费使用，欢迎贡献。</p>
+                    <div class="social-links">
+                        <a href="https://github.com/Zippland/Snap-Solver/" target="_blank"><i class="fab fa-github"></i></a>
+                        <a href="mailto:zylanjian@outlook.com"><i class="fas fa-envelope"></i></a>
+                        <a href="https://www.xiaohongshu.com/user/profile/623e8b080000000010007721?xsec_token=YBdeHZTp_aVwi1Ijmras5CgQC6pxlpd4RmozT8Hr_-NCA%3D&xsec_source=app_share&xhsshare=CopyLink&appuid=623e8b080000000010007721&apptime=1742201089&share_id=a2704ab48e2c4e1aa321ce63168811b5&share_channel=copy_link" target="_blank" class="xiaohongshu-icon"><i class="fas fa-heart"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>快速链接</h3>
+                    <a href="#features" class="footer-link"><i class="fas fa-angle-right"></i> 功能特性</a>
+                    <a href="https://github.com/Zippland/Snap-Solver/" target="_blank" class="footer-link"><i class="fas fa-angle-right"></i> GitHub 仓库</a>
+                    <a href="https://github.com/Zippland/Snap-Solver/issues" target="_blank" class="footer-link"><i class="fas fa-angle-right"></i> 问题反馈</a>
+                </div>
+                <div class="footer-column">
+                    <h3>联系我们</h3>
+                    <a href="mailto:zylanjian@outlook.com" class="footer-link"><i class="fas fa-envelope"></i> zylanjian@outlook.com</a>
+                    <a href="https://www.xiaohongshu.com/user/profile/623e8b080000000010007721?xsec_token=YBdeHZTp_aVwi1Ijmras5CgQC6pxlpd4RmozT8Hr_-NCA%3D&xsec_source=app_share&xhsshare=CopyLink&appuid=623e8b080000000010007721&apptime=1742201089&share_id=a2704ab48e2c4e1aa321ce63168811b5&share_channel=copy_link" target="_blank" class="footer-link"><i class="fas fa-heart xiaohongshu-icon"></i> 小红书</a>
+                    <a href="https://github.com/Zippland/Snap-Solver/" target="_blank" class="footer-link"><i class="fab fa-github"></i> GitHub</a>
+                </div>
+                <div class="footer-column">
+                    <h3>反馈建议</h3>
+                    <p>我们非常重视您的反馈和建议，它们对我们产品的改进至关重要。如有任何想法，欢迎随时联系我们。</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 Snap-Solver. 基于 <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank">MIT 许可证</a> 开源</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

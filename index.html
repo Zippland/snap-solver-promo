@@ -1,666 +1,437 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snap-Solver - AI笔试测评工具</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #2196F3;
-            --primary-dark: #1976D2;
-            --secondary: #4CAF50;
-            --background: #f9fafb;
-            --text: #333333;
-            --text-light: #666666;
-            --surface: #ffffff;
-            --border: #e0e0e0;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --success: #4CAF50;
-            --warning: #FFC107;
-            --danger: #F44336;
-            --accent: #ff2442;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snap-Solver — 手机遥控电脑的开源截屏解题工具</title>
+<meta name="description" content="在自己电脑上运行的 AI 解题工具：手机点一下，电脑整屏截图回传，框选题目交给你选的模型，流式解答还能同题追问。自带密钥，开源免费。">
+<style>
+:root {
+    --bg: #14110e;
+    --surface: #1f1b16;
+    --surface-2: #272119;
+    --edge: #332c22;
+    --separator: #2b251d;
+    --text: #ede6da;
+    --body: #d6cdbf;
+    --dim: #a79c8b;
+    --faint: #776d5e;
+    --accent: #3ec99a;
+    --accent-deep: #2ba97e;
+    --on-accent: #10241c;
+    --accent-soft: rgba(62, 201, 154, 0.12);
+    --paper: #f6f3ec;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--body);
+    line-height: 1.75;
+    overflow-x: hidden;
+}
+::selection { background: var(--accent); color: var(--on-accent); }
+a { color: var(--accent); text-decoration: none; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* ---------- 顶栏 ---------- */
+.topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(20, 17, 14, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--separator);
+}
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.wordmark { display: flex; align-items: center; gap: 10px; font: 700 17px/1 var(--sans); color: var(--text); }
+.glyph {
+    width: 26px; height: 26px; border-radius: 8px; position: relative;
+    background: var(--accent);
+    box-shadow: 0 0 18px rgba(62, 201, 154, 0.35);
+}
+.glyph::before {
+    content: ""; position: absolute; inset: 7px;
+    border: 2.5px solid var(--on-accent); border-radius: 3px;
+}
+.top-gh {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 13px/1 var(--sans); color: var(--dim);
+    border: 1px solid var(--edge); border-radius: 999px;
+    padding: 9px 16px; transition: color .2s, border-color .2s;
+}
+.top-gh:hover { color: var(--text); border-color: var(--faint); }
+.top-gh svg { width: 15px; height: 15px; fill: currentColor; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background-color: var(--background);
-            overflow-x: hidden;
-        }
+/* ---------- Hero ---------- */
+.hero { position: relative; padding: 84px 0 72px; overflow: hidden; }
+.hero::before {
+    content: ""; position: absolute; top: -260px; left: 50%; transform: translateX(-72%);
+    width: 900px; height: 700px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(62, 201, 154, 0.09), transparent 70%);
+}
+.hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center; position: relative; }
+.hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 12px/1 var(--mono); letter-spacing: 0.12em;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid rgba(62, 201, 154, 0.25);
+    border-radius: 999px; padding: 7px 14px; margin-bottom: 26px;
+}
+.hero h1 {
+    font: 800 clamp(34px, 4.6vw, 54px)/1.22 var(--sans);
+    color: var(--text); letter-spacing: -0.01em;
+    text-wrap: balance; margin-bottom: 22px;
+}
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero-sub { font-size: 17px; color: var(--dim); max-width: 460px; text-wrap: pretty; margin-bottom: 34px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.btn-solid {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--accent); color: var(--on-accent);
+    font: 700 15px/1 var(--sans);
+    border-radius: 999px; padding: 15px 28px;
+    box-shadow: 0 6px 24px rgba(62, 201, 154, 0.28);
+    transition: transform .2s, box-shadow .2s, background .2s;
+}
+.btn-solid:hover { transform: translateY(-2px); background: #4bd6a8; box-shadow: 0 10px 30px rgba(62, 201, 154, 0.36); }
+.btn-solid svg { width: 16px; height: 16px; fill: currentColor; }
+.btn-line {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 15px/1 var(--sans); color: var(--dim);
+    border: 1px solid var(--edge); border-radius: 999px; padding: 14px 24px;
+    transition: color .2s, border-color .2s;
+}
+.btn-line:hover { color: var(--text); border-color: var(--faint); }
+.hero-note { width: 100%; font: 12.5px/1.6 var(--sans); color: var(--faint); margin-top: 6px; }
+.hero-note code { font: 12px/1 var(--mono); color: var(--dim); background: var(--surface); border: 1px solid var(--edge); border-radius: 5px; padding: 2px 7px; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+/* 手机壳 */
+.phone {
+    width: 100%; max-width: 300px;
+    border-radius: 38px; padding: 10px;
+    background: #0c0a08;
+    border: 1px solid #3a332a;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    position: relative;
+}
+.phone::after {
+    content: ""; position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    width: 74px; height: 20px; border-radius: 999px; background: #0c0a08;
+}
+.phone img { display: block; width: 100%; border-radius: 29px; }
+.hero-phone { justify-self: center; rotate: 2deg; }
 
-        .open-source-banner {
-            background-color: var(--success);
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+/* ---------- 流程 ---------- */
+.pipeline { border-top: 1px solid var(--separator); border-bottom: 1px solid var(--separator); background: var(--surface); }
+.pipeline .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+.pipe-step { padding: 30px 26px 32px; position: relative; }
+.pipe-step + .pipe-step { border-left: 1px solid var(--separator); }
+.pipe-num { font: 600 12px/1 var(--mono); color: var(--accent); letter-spacing: 0.1em; display: block; margin-bottom: 12px; }
+.pipe-step h3 { font: 700 16px/1.3 var(--sans); color: var(--text); margin-bottom: 6px; }
+.pipe-step p { font-size: 13.5px; color: var(--faint); line-height: 1.65; }
 
-        /* 头部样式 */
-        header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 60px 0 80px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+/* ---------- 章节通用 ---------- */
+section.block { padding: 96px 0; }
+.sec-head { max-width: 560px; margin-bottom: 56px; }
+.sec-eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.14em; color: var(--accent); display: block; margin-bottom: 14px; }
+.sec-head h2 { font: 800 clamp(26px, 3.2vw, 36px)/1.3 var(--sans); color: var(--text); letter-spacing: -0.01em; text-wrap: balance; margin-bottom: 14px; }
+.sec-head p { color: var(--dim); font-size: 15.5px; text-wrap: pretty; }
 
-        .header-content {
-            position: relative;
-            z-index: 2;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+/* ---------- 截图廊 ---------- */
+.gallery-strip {
+    display: flex; gap: 36px;
+    overflow-x: auto;
+    padding: 10px max(24px, calc((100vw - 1072px) / 2)) 26px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.gallery-strip::-webkit-scrollbar { display: none; }
+.shot { flex: none; scroll-snap-align: center; width: 264px; }
+.shot .phone { max-width: 264px; }
+.shot figcaption { margin-top: 18px; text-align: center; }
+.shot figcaption b { display: block; font: 700 15px/1.4 var(--sans); color: var(--text); margin-bottom: 4px; }
+.shot figcaption span { font-size: 13px; color: var(--faint); line-height: 1.6; display: block; }
 
-        header h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+/* ---------- 特性 ---------- */
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.feat {
+    background: var(--surface); border: 1px solid var(--edge);
+    border-radius: 18px; padding: 28px 26px;
+    transition: border-color .25s, transform .25s;
+}
+.feat:hover { border-color: #4a4234; transform: translateY(-3px); }
+.feat-ico {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+}
+.feat-ico svg { width: 20px; height: 20px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.feat h3 { font: 700 16.5px/1.4 var(--sans); color: var(--text); margin-bottom: 8px; }
+.feat p { font-size: 14px; color: var(--dim); line-height: 1.7; }
+.feat p code { font: 12.5px/1 var(--mono); color: var(--body); background: var(--surface-2); border-radius: 5px; padding: 1px 6px; }
 
-        header p {
-            font-size: 20px;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
+/* ---------- 模型阵容 ---------- */
+.models { background: var(--surface); border-top: 1px solid var(--separator); border-bottom: 1px solid var(--separator); }
+.model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.model-cell {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    background: var(--bg); border: 1px solid var(--edge);
+    border-radius: 14px; padding: 18px 20px;
+}
+.model-cell b { font: 700 15px/1.3 var(--sans); color: var(--text); white-space: nowrap; }
+.model-cell span { font: 12px/1.5 var(--mono); color: var(--faint); text-align: right; }
+.models-note { margin-top: 22px; font-size: 13px; color: var(--faint); }
 
-        .btn-primary {
-            display: inline-block;
-            background-color: white;
-            color: var(--primary);
-            padding: 12px 30px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
+/* ---------- CTA ---------- */
+.cta-box {
+    background: linear-gradient(160deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--edge); border-radius: 26px;
+    padding: 64px 56px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+    position: relative; overflow: hidden;
+}
+.cta-box::before {
+    content: ""; position: absolute; right: -140px; bottom: -180px;
+    width: 460px; height: 460px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(62, 201, 154, 0.10), transparent 70%);
+}
+.cta-box h2 { font: 800 clamp(24px, 3vw, 32px)/1.3 var(--sans); color: var(--text); margin-bottom: 12px; text-wrap: balance; }
+.cta-box > div > p { color: var(--dim); font-size: 15px; margin-bottom: 28px; max-width: 380px; }
+.terminal {
+    background: #0e0c09; border: 1px solid var(--edge); border-radius: 14px;
+    font: 13px/2.1 var(--mono); color: var(--body);
+    padding: 22px 24px; position: relative; z-index: 1;
+    overflow-x: auto; white-space: nowrap;
+}
+.terminal .dots { display: flex; gap: 6px; margin-bottom: 14px; }
+.terminal .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); }
+.terminal .p { color: var(--faint); user-select: none; }
+.terminal .c { color: var(--accent); }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
+/* ---------- 页脚 ---------- */
+footer { border-top: 1px solid var(--separator); padding: 44px 0 52px; }
+.foot-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.foot-brand { display: flex; align-items: center; gap: 10px; color: var(--dim); font: 600 14px/1 var(--sans); }
+.foot-brand .glyph { width: 20px; height: 20px; border-radius: 6px; box-shadow: none; }
+.foot-brand .glyph::before { inset: 5px; border-width: 2px; }
+.foot-links { display: flex; gap: 26px; font-size: 13.5px; }
+.foot-links a { color: var(--faint); transition: color .2s; }
+.foot-links a:hover { color: var(--text); }
+.foot-license { width: 100%; margin-top: 18px; font-size: 12.5px; color: var(--faint); }
+.foot-license a { color: var(--dim); }
 
-        .btn-secondary {
-            display: inline-block;
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-left: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 50px;
-            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg"><path d="M0,64L80,69.3C160,75,320,85,480,85.3C640,85,800,75,960,58.7C1120,43,1280,21,1360,10.7L1440,0L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" fill="white"/></svg>');
-            background-size: cover;
-            background-repeat: no-repeat;
-            z-index: 1;
-        }
-
-        /* 特性部分 */
-        .features {
-            padding: 80px 0;
-            background-color: var(--surface);
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-title h2 {
-            font-size: 34px;
-            color: var(--text);
-            margin-bottom: 15px;
-        }
-
-        .section-title p {
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background-color: var(--surface);
-            border-radius: 10px;
-            box-shadow: 0 10px 30px var(--shadow);
-            padding: 30px;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: rgba(33, 150, 243, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .feature-icon i {
-            font-size: 24px;
-            color: var(--primary);
-        }
-
-        .feature-card h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-        }
-
-        .feature-card p {
-            color: var(--text-light);
-        }
-
-        /* 工作流程 */
-        .workflow {
-            padding: 80px 0;
-            background-color: #f5f8fb;
-        }
-
-        .workflow-steps {
-            display: flex;
-            justify-content: space-between;
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .workflow-steps::before {
-            content: "";
-            position: absolute;
-            top: 40px;
-            left: 30px;
-            right: 30px;
-            height: 4px;
-            background-color: var(--border);
-            z-index: 1;
-        }
-
-        .workflow-step {
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            max-width: 180px;
-        }
-
-        .step-number {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 30px;
-            font-weight: 700;
-            margin: 0 auto 20px;
-            box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
-        }
-
-        .workflow-step h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .workflow-step p {
-            font-size: 14px;
-            color: var(--text-light);
-        }
-
-        /* 演示部分 */
-        .demo {
-            padding: 80px 0;
-            background-color: var(--surface);
-        }
-
-        .demo-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 40px;
-        }
-
-        .demo-content {
-            flex: 1;
-        }
-
-        .demo-image {
-            flex: 1;
-            text-align: center;
-        }
-
-        .demo-image img {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-
-        .demo-image img:hover {
-            transform: scale(1.03);
-        }
-
-        .demo-content h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        .demo-content p {
-            color: var(--text-light);
-            margin-bottom: 30px;
-        }
-
-        .check-list {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-
-        .check-list li {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .check-list li i {
-            color: var(--success);
-            margin-right: 10px;
-            margin-top: 4px;
-        }
-
-        /* CTA部分 */
-        .cta {
-            padding: 80px 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .cta h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        .cta p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            opacity: 0.9;
-        }
-
-        /* 底部 */
-        footer {
-            background-color: #1a1a2e;
-            color: rgba(255, 255, 255, 0.7);
-            padding: 60px 0;
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .footer-column {
-            margin-bottom: 30px;
-            min-width: 200px;
-        }
-
-        .footer-column h3 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .footer-column p {
-            margin-bottom: 15px;
-            font-size: 14px;
-            max-width: 300px;
-        }
-
-        .social-links {
-            display: flex;
-            margin-top: 20px;
-        }
-
-        .social-links a {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .social-links a:hover {
-            background-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        .footer-link {
-            display: block;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .footer-link:hover {
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .footer-link i {
-            margin-right: 8px;
-            font-size: 14px;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 30px;
-            font-size: 14px;
-        }
-
-        .copyright a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .copyright a:hover {
-            text-decoration: underline;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 36px;
-            }
-            header p {
-                font-size: 16px;
-            }
-            .demo-container {
-                flex-direction: column;
-            }
-            .workflow-steps {
-                flex-direction: column;
-                gap: 30px;
-                align-items: center;
-            }
-            .workflow-steps::before {
-                width: 4px;
-                height: 100%;
-                left: 50%;
-                top: 0;
-                transform: translateX(-50%);
-                right: auto;
-            }
-            .footer-content {
-                flex-direction: column;
-            }
-            .btn-primary, .btn-secondary {
-                display: block;
-                margin: 10px auto;
-                max-width: 200px;
-            }
-        }
-
-        /* 特殊样式 */
-        .xiaohongshu-icon {
-            color: var(--accent);
-        }
-
-        .highlight-card {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.2) 100%);
-            border: 2px solid var(--success);
-            position: relative;
-        }
-
-        .highlight-card::before {
-            content: "免费";
-            position: absolute;
-            top: -12px;
-            right: 20px;
-            background-color: var(--success);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-    </style>
+/* ---------- 动效与响应式 ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero-copy > * { animation: rise .6s cubic-bezier(.2,.7,.3,1) backwards; }
+.hero-copy > *:nth-child(2) { animation-delay: .06s; }
+.hero-copy > *:nth-child(3) { animation-delay: .12s; }
+.hero-copy > *:nth-child(4) { animation-delay: .18s; }
+.hero-copy > *:nth-child(5) { animation-delay: .24s; }
+.hero-phone { animation: rise .7s cubic-bezier(.2,.7,.3,1) .15s backwards; }
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+}
+@media (max-width: 900px) {
+    .hero { padding: 56px 0 48px; }
+    .hero .wrap { grid-template-columns: 1fr; gap: 44px; }
+    .hero-phone { rotate: 0deg; }
+    .pipeline .wrap { grid-template-columns: 1fr 1fr; }
+    .pipe-step:nth-child(3) { border-left: none; }
+    .pipe-step:nth-child(n+3) { border-top: 1px solid var(--separator); }
+    .feat-grid { grid-template-columns: 1fr 1fr; }
+    .model-grid { grid-template-columns: 1fr 1fr; }
+    .cta-box { grid-template-columns: 1fr; padding: 44px 30px; }
+    section.block { padding: 72px 0; }
+}
+@media (max-width: 560px) {
+    .feat-grid, .model-grid { grid-template-columns: 1fr; }
+    .pipeline .wrap { grid-template-columns: 1fr; padding: 0; }
+    .pipe-step + .pipe-step { border-left: none; border-top: 1px solid var(--separator); }
+    .hero-actions .btn-solid, .hero-actions .btn-line { width: 100%; justify-content: center; }
+}
+</style>
 </head>
 <body>
-    <div class="open-source-banner">
-        <div class="container">
-            ⭐ 100%免费开源的AI笔试测评工具，欢迎使用与贡献 ⭐
+
+<nav class="topbar">
+    <div class="wrap">
+        <span class="wordmark"><span class="glyph"></span>Snap-Solver</span>
+        <a class="top-gh" href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+        </a>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="wrap">
+        <div class="hero-copy">
+            <span class="hero-eyebrow">OPEN SOURCE · SELF-HOSTED</span>
+            <h1>手机上点一下，<br>电脑屏幕上的题<em>就解了</em></h1>
+            <p class="hero-sub">在自己电脑上运行的 AI 解题工具：电脑自动截屏回传手机，框选题目交给你选的模型，流式解答、思考过程全程可见——看不懂还能就这道题继续追问。</p>
+            <div class="hero-actions">
+                <a class="btn-solid" href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                    GitHub 免费获取
+                </a>
+                <a class="btn-line" href="https://github.com/Zippland/Snap-Solver/blob/main/docs/beginner-tutorial.md" target="_blank" rel="noopener">零基础教程</a>
+            </div>
+            <p class="hero-note">自带密钥（BYO-Key）· 支持 <code>Claude</code> <code>GPT</code> <code>Gemini</code> <code>通义</code> <code>豆包</code> <code>Kimi</code></p>
+        </div>
+        <div class="phone hero-phone"><img src="images/home.png" alt="Snap-Solver 手机端主界面：一个青绿色的大截屏按钮" width="375" height="812"></div>
+    </div>
+</header>
+
+<div class="pipeline">
+    <div class="wrap">
+        <div class="pipe-step">
+            <span class="pipe-num">01 / 截屏</span>
+            <h3>手机点一下</h3>
+            <p>电脑自动截取整个屏幕，一秒回传到手机</p>
+        </div>
+        <div class="pipe-step">
+            <span class="pipe-num">02 / 框选</span>
+            <h3>圈出题目</h3>
+            <p>双指缩放、拖角框选，只把题干发给模型</p>
+        </div>
+        <div class="pipe-step">
+            <span class="pipe-num">03 / 解答</span>
+            <h3>流式作答</h3>
+            <p>思考过程实时展开，答案带公式与代码渲染</p>
+        </div>
+        <div class="pipe-step">
+            <span class="pipe-num">04 / 追问</span>
+            <h3>不懂就问</h3>
+            <p>围绕本题继续追问，换题即清空、不留痕迹</p>
         </div>
     </div>
+</div>
 
-    <header>
-        <div class="container header-content">
-            <h1>Snap-Solver <span style="font-size: 0.7em; vertical-align: super; color: #FFEB3B;">免费开源</span></h1>
-            <p>AI驱动的笔试工具</p>
+<section class="block" id="shots">
+    <div class="wrap sec-head">
+        <span class="sec-eyebrow">SCREENSHOTS</span>
+        <h2>从截屏到追问，一条流程走完</h2>
+        <p>以下全部为真实界面截图：暖色深色主题、思考过程独立折叠、每一步都为单手操作设计。</p>
+    </div>
+    <div class="gallery-strip">
+        <figure class="shot">
+            <div class="phone"><img src="images/workspace.png" alt="框选工作台：在电脑整屏截图上框选题目" loading="lazy" width="375" height="812"></div>
+            <figcaption><b>框选题目</b><span>角柄拖拽 + 实时像素读数</span></figcaption>
+        </figure>
+        <figure class="shot">
+            <div class="phone"><img src="images/thinking.png" alt="解答中：思考过程以淡色小字实时展开" loading="lazy" width="375" height="812"></div>
+            <figcaption><b>思考可见</b><span>推理过程实时流出，结束自动收起</span></figcaption>
+        </figure>
+        <figure class="shot">
+            <div class="phone"><img src="images/answer.png" alt="解答完成：Markdown 渲染的答案与追问输入框" loading="lazy" width="375" height="812"></div>
+            <figcaption><b>结构化答案</b><span>公式、代码渲染，重解/换模型一键可达</span></figcaption>
+        </figure>
+        <figure class="shot">
+            <div class="phone"><img src="images/followup.png" alt="同题追问：围绕本题的多轮问答" loading="lazy" width="375" height="812"></div>
+            <figcaption><b>同题追问</b><span>带着题目和上下文继续问，直到弄懂</span></figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="block" id="features" style="padding-top: 0;">
+    <div class="wrap">
+        <div class="sec-head">
+            <span class="sec-eyebrow">WHY SNAP-SOLVER</span>
+            <h2>为部署在自己电脑上而设计</h2>
+        </div>
+        <div class="feat-grid">
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M12 3v10m0 0 4-4m-4 4-4-4"/><path d="M4 17h16v4H4z"/></svg></div>
+                <h3>局域网直连</h3>
+                <p>手机与电脑同一 Wi-Fi 即可使用，截图不经任何中间服务器，回传快、不排队。</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></div>
+                <h3>六家模型任选</h3>
+                <p>Claude、GPT、Gemini、通义、豆包、Kimi 同屏切换，哪个顺手用哪个，还能换模型重解对比。</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 1 7 7c0 2.4-1.2 4.1-2.6 5.4-.8.8-1.4 1.9-1.4 3.1h-6c0-1.2-.6-2.3-1.4-3.1C6.2 14.1 5 12.4 5 10a7 7 0 0 1 7-7z"/><path d="M9.5 21.5h5"/></svg></div>
+                <h3>思考过程可见</h3>
+                <p>推理模型「怎么想的」以淡色小字实时展开，答完自动收起——看过程比抄答案更有用。</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 1 1-3.6-6.7"/><path d="M21 4v5h-5"/><path d="M8 12h5M8 15.5h8"/></svg></div>
+                <h3>同题追问</h3>
+                <p>答案没看懂，就在底部输入框继续问。上下文 = 题目截图 + 已有问答，换题或返回即清空。</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                <h3>自带密钥，数据自持</h3>
+                <p>用你自己的 API Key 直连各厂商，密钥只存在电脑本地的 <code>.snapsolver/</code>，没有账号、没有订阅。</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+                <h3>全平台，免安装</h3>
+                <p>电脑端支持 Windows / macOS / Linux；手机端就是浏览器，不用装 App、不用注册。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="block models" id="models">
+    <div class="wrap">
+        <div class="sec-head">
+            <span class="sec-eyebrow">MODEL LINEUP</span>
+            <h2>接入六家厂商的当家模型</h2>
+            <p>统一 Fast / High / Max 三档推理档位，切换模型时按能力自动适配；国内厂商无需代理即可直连。</p>
+        </div>
+        <div class="model-grid">
+            <div class="model-cell"><b>Anthropic</b><span>Claude Opus / Sonnet / Haiku</span></div>
+            <div class="model-cell"><b>OpenAI</b><span>GPT-5.6 系列</span></div>
+            <div class="model-cell"><b>Google</b><span>Gemini 3.x / 2.5</span></div>
+            <div class="model-cell"><b>阿里通义</b><span>Qwen3-VL / QVQ</span></div>
+            <div class="model-cell"><b>字节豆包</b><span>Doubao Seed 1.6</span></div>
+            <div class="model-cell"><b>Moonshot</b><span>Kimi K2.6 / K2.5</span></div>
+        </div>
+        <p class="models-note">模型阵容随仓库更新持续跟进，也可在配置文件中自行增删。</p>
+    </div>
+</section>
+
+<section class="block" id="get-started">
+    <div class="wrap">
+        <div class="cta-box">
             <div>
-                <a href="#get-started" class="btn-primary">立即体验</a>
-                <a href="#features" class="btn-secondary">了解更多</a>
+                <h2>三行命令，跑在你自己的电脑上</h2>
+                <p>克隆仓库、装好依赖、启动——手机连同一 Wi-Fi 打开终端里打印的地址就能用。卡住了就看零基础教程。</p>
+                <div class="hero-actions">
+                    <a class="btn-solid" href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">前往 GitHub</a>
+                    <a class="btn-line" href="https://github.com/Zippland/Snap-Solver/blob/main/docs/beginner-tutorial.md" target="_blank" rel="noopener">新手教程</a>
+                </div>
+            </div>
+            <div class="terminal">
+                <div class="dots"><i></i><i></i><i></i></div>
+                <div><span class="p">$</span> <span class="c">git clone</span> https://github.com/Zippland/Snap-Solver.git</div>
+                <div><span class="p">$</span> <span class="c">pip install</span> -r requirements.txt</div>
+                <div><span class="p">$</span> <span class="c">python</span> app.py</div>
+                <div><span class="p">→ Running on http://192.168.1.8:5000</span></div>
             </div>
         </div>
-        <div class="wave"></div>
-    </header>
+    </div>
+</section>
 
-    <!-- 特性部分 -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-title">
-                <h2>线上考试，从未如此简单</h2>
-                <p>多种强大功能，帮助您轻松应对各类笔试测评</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <h3>绝佳隐蔽性</h3>
-                    <p>在手机上使用快捷键，即可识别电脑屏幕。全程不需要使用电脑，完全脱离监控软件限制</p>
-                </div>
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-network-wired"></i>
-                    </div>
-                    <h3>无与伦比的快</h3>
-                    <p>和其他同类软件不同，我们让设备在同一网络下沟通，真正实现零延迟，大幅度提高效率</p>
-                </div>
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3>代码、公式...精准识别！</h3>
-                    <p>与其他同类软件不同，我们调用专业OCR工具识别数学公式和图片中的文字，精准率大幅提升</p>
-                </div>
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3>AI？全是顶配！</h3>
-                    <p>同时支持 GPT-4o、o3-mini、Claude-3.7 和 DeepSeek-r1/v3 等业界最强大的 AI 模型阵容，满足不同需求</p>
-                </div>
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>VPN 代理支持</h3>
-                    <p>可自定义 VPN 代理，支持国内用户通过代理访问 AI 模型，畅通无阻</p>
-                </div>
-                <div class="feature-card highlight-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-laptop-code"></i>
-                    </div>
-                    <h3>全平台支持</h3>
-                    <p>Windows、MacOS、Linux 系统可用，不需要下载APP、不需要充值、不需要注册，随时随地使用</p>
-                </div>
-            </div>
+<footer>
+    <div class="wrap foot-row">
+        <span class="foot-brand"><span class="glyph"></span>Snap-Solver</span>
+        <div class="foot-links">
+            <a href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://github.com/Zippland/Snap-Solver/issues" target="_blank" rel="noopener">问题反馈</a>
+            <a href="https://github.com/Zippland/Snap-Solver/blob/main/docs/beginner-tutorial.md" target="_blank" rel="noopener">新手教程</a>
         </div>
-    </section>
+        <p class="foot-license">© 2026 Zippland · 基于 <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a> 开源 · 请在遵守所在学校与考试机构规定的前提下使用</p>
+    </div>
+</footer>
 
-    <!-- 工作流程 -->
-    <section class="workflow">
-        <div class="container">
-            <div class="section-title">
-                <h2>使用流程</h2>
-                <p>简单几步，轻松解答复杂问题</p>
-            </div>
-            <div class="workflow-steps">
-                <div class="workflow-step">
-                    <div class="step-number">1</div>
-                    <h3>部署启动</h3>
-                    <p>安装依赖，启动应用，获取本地IP地址</p>
-                </div>
-                <div class="workflow-step">
-                    <div class="step-number">2</div>
-                    <h3>截取题目</h3>
-                    <p>按下快捷键，截取电脑屏幕上的题目图像</p>
-                </div>
-                <div class="workflow-step">
-                    <div class="step-number">3</div>
-                    <h3>识别分析</h3>
-                    <p>系统自动识别图像中的文字并进行分析</p>
-                </div>
-                <div class="workflow-step">
-                    <div class="step-number">4</div>
-                    <h3>获取解答</h3>
-                    <p>AI给出详细解答，包含思考过程和最终答案</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 演示部分 -->
-    <section class="demo">
-        <div class="container demo-container">
-            <div class="demo-content">
-                <h2>为什么选择 Snap-Solver？</h2>
-                <p>Snap-Solver 不仅仅是一个解题工具，它是您学习和工作的得力助手</p>
-                <ul class="check-list">
-                    <li><i class="fas fa-check-circle"></i>完全开源，免费使用，无任何隐藏收费</li>
-                    <li><i class="fas fa-check-circle"></i>操作简单，即使是技术小白也能快速上手</li>
-                    <li><i class="fas fa-check-circle"></i>支持多种 AI 模型，确保答案准确性和多样性</li>
-                    <li><i class="fas fa-check-circle"></i>支持数学公式识别，科学计算难题也能轻松应对</li>
-                    <li><i class="fas fa-check-circle"></i>团队协作功能，多设备共享，提高学习效率</li>
-                </ul>
-                <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">查看源码</a>
-            </div>
-            <div class="demo-image">
-                <img src="images/demo.png" alt="Snap-Solver 演示" onerror="this.src='https://via.placeholder.com/450x300/1976D2/FFFFFF?text=Snap-Solver'">
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA部分 -->
-    <section class="cta" id="get-started">
-        <div class="container">
-            <h2>立即开始使用</h2>
-            <p>无论是学习中的复杂问题，还是工作中的专业难题，Snap-Solver 都能为您提供支持。完全开源，免费使用，快来体验！</p>
-            <a href="https://github.com/Zippland/Snap-Solver/" class="btn-primary" target="_blank">⭐ 开始部署</a>
-            <a href="#contact" class="btn-secondary">💼 不会部署？点这里寻求帮助</a>
-        </div>
-    </section>
-
-    <!-- 底部 -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>关于 Snap-Solver</h3>
-                    <p>Snap-Solver 是一个强大的 AI 笔试测评工具，帮助用户快速解答各类问题。完全开源，免费使用，欢迎贡献。</p>
-                    <div class="social-links">
-                        <a href="https://github.com/Zippland/Snap-Solver/" target="_blank"><i class="fab fa-github"></i></a>
-                        <a href="mailto:zylanjian@outlook.com"><i class="fas fa-envelope"></i></a>
-                        <a href="https://www.xiaohongshu.com/user/profile/623e8b080000000010007721?xsec_token=YBdeHZTp_aVwi1Ijmras5CgQC6pxlpd4RmozT8Hr_-NCA%3D&xsec_source=app_share&xhsshare=CopyLink&appuid=623e8b080000000010007721&apptime=1742201089&share_id=a2704ab48e2c4e1aa321ce63168811b5&share_channel=copy_link" target="_blank"><i class="fas fa-heart"></i></a>
-                    </div>
-                    <div class="user-stats" style="margin-top: 15px;">
-                        <a href="https://hits.seeyoufarm.com" target="_blank">
-                            <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FZippland%2FSnap-Solver&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=用户量&edge_flat=false"/>
-                        </a>
-                    </div>
-                </div>
-                <div class="footer-column">
-                    <h3>快速链接</h3>
-                    <a href="#features" class="footer-link"><i class="fas fa-angle-right"></i> 功能特性</a>
-                    <a href="https://github.com/Zippland/Snap-Solver/" target="_blank" class="footer-link"><i class="fas fa-angle-right"></i> GitHub 仓库</a>
-                    <a href="https://github.com/Zippland/Snap-Solver/issues" target="_blank" class="footer-link"><i class="fas fa-angle-right"></i> 问题反馈</a>
-                </div>
-                <div class="footer-column">
-                    <h3>💼 代部署服务</h3>
-                    <p>不会部署？没有时间？我们提供专业的Snap-Solver代部署服务，一次付费，终身使用。详情请通过邮件或小红书私信联系我们获取更多信息。</p>
-                </div>
-                <div class="footer-column" id="contact">
-                    <h3>📞 联系作者帮忙部署</h3>
-                    <a href="mailto:zylanjian@outlook.com" class="footer-link"><i class="fas fa-envelope"></i> zylanjian@outlook.com</a>
-                    <a href="https://www.xiaohongshu.com/user/profile/623e8b080000000010007721?xsec_token=YBdeHZTp_aVwi1Ijmras5CgQC6pxlpd4RmozT8Hr_-NCA%3D&xsec_source=app_share&xhsshare=CopyLink&appuid=623e8b080000000010007721&apptime=1742201089&share_id=a2704ab48e2c4e1aa321ce63168811b5&share_channel=copy_link" target="_blank" class="footer-link"><i class="fas fa-book"></i> 小红书</a>
-                    <a href="https://github.com/Zippland/Snap-Solver/" target="_blank" class="footer-link"><i class="fab fa-github"></i> GitHub</a>
-                    <a href="#" class="footer-link highlight-text" style="color: var(--success); font-weight: bold;"><i class="fas fa-code"></i> 提供1对1代部署服务，让您无忧使用</a>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2024 Snap-Solver. 基于 <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank">Apache 2.0 许可证</a> 开源</p>
-            </div>
-        </div>
-    </footer>
 </body>
-</html> 
+</html>

@@ -160,6 +160,16 @@ section.block { padding: 88px 0; }
 .trust-strip b { color: var(--dim); font-weight: 600; }
 .trust-strip i { font-style: normal; color: var(--edge); margin: 0 10px; }
 
+/* 画廊滑动提示（仅手机） */
+.swipe-hint {
+    display: none;
+    text-align: center;
+    font: 600 11px/1 var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--faint);
+    margin-bottom: 10px;
+}
+
 /* ---------- CTA：开放式收尾段 ---------- */
 .cta {
     position: relative; overflow: hidden;
@@ -204,17 +214,59 @@ footer { border-top: 1px solid var(--separator); padding: 44px 0 52px; }
     * { animation: none !important; transition: none !important; }
     html { scroll-behavior: auto; }
 }
+/* 平板：单列但保留 hero 手机壳 */
 @media (max-width: 900px) {
     .hero { padding: 56px 0 52px; }
     .hero .wrap { grid-template-columns: 1fr; gap: 44px; }
     .hero-phone { rotate: 0deg; }
     .win-grid { grid-template-columns: 1fr; }
-    section.block { padding: 68px 0; }
-    .gallery { padding-bottom: 68px; }
-    .top-link { display: none; }
+    section.block { padding: 64px 0; }
+    .gallery { padding-bottom: 64px; }
 }
-@media (max-width: 560px) {
+
+/* 手机竖屏：纯文案首屏，画廊即视觉 */
+@media (max-width: 700px) {
+    .topbar .wrap { height: 54px; }
+    .top-gh { padding: 8px 13px; }
+
+    .hero { padding: 40px 0 8px; }
+    .hero .wrap { gap: 0; }
+    .hero-phone { display: none; }              /* 画廊四台真机紧随其后，首屏不再塞第五台 */
+    .hero-eyebrow { font-size: 11px; padding: 6px 12px; margin-bottom: 18px; }
+    /* 第二行「电脑屏幕上的题就解了」共 10 个全角字，按视口宽精确防孤字 */
+    .hero h1 { font-size: min(32px, calc((100vw - 56px) / 10)); margin-bottom: 16px; }
+    .hero-sub { font-size: 15.5px; margin-bottom: 26px; }
+    .hero-actions { gap: 10px; }
     .hero-actions .btn-solid, .hero-actions .btn-line { width: 100%; justify-content: center; }
+    .btn-solid { padding: 16px 24px; }
+    .hero-note { margin-top: 14px; line-height: 2.2; }
+
+    .swipe-hint { display: block; }
+    .gallery { padding-bottom: 56px; }
+    .gallery-strip { gap: 22px; padding-top: 4px; padding-bottom: 18px; }
+    .shot { width: 246px; }
+    .shot .phone { max-width: 246px; }
+
+    section.block { padding: 56px 0; }
+    .sec-head { margin-bottom: 36px; }
+    .win-grid { gap: 12px; }
+    .win { padding: 24px 22px; border-radius: 16px; }
+    .win .w-num { margin-bottom: 12px; }
+    .win h3 { font-size: 17.5px; }
+
+    /* 信任条：三段改竖排 */
+    .trust-strip { margin-top: 28px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+    .trust-strip i { display: none; }
+
+    .cta { padding: 72px 0 80px; }
+    .cta p { font-size: 14.5px; margin-bottom: 30px; }
+    .cta .hero-actions { gap: 10px; }
+    .cta .btn-solid { padding: 17px 24px; }
+    .cta p.cta-foot { margin-top: 26px; }
+
+    footer { padding: 36px 0 44px; }
+    .foot-row { flex-direction: column; text-align: center; gap: 16px; }
+    .foot-license { margin-top: 4px; text-align: center; line-height: 1.9; }
 }
 </style>
 </head>
@@ -254,6 +306,7 @@ footer { border-top: 1px solid var(--separator); padding: 44px 0 52px; }
 
 <!-- 真实截图：流程即证明 -->
 <section class="gallery" id="shots">
+    <p class="swipe-hint">左右滑动 · 完整流程 01 – 04</p>
     <div class="gallery-strip">
         <figure class="shot">
             <div class="phone"><img src="images/workspace.png" alt="框选工作台：在电脑整屏截图上框选题目" loading="lazy" width="750" height="1624"></div>
@@ -298,7 +351,7 @@ footer { border-top: 1px solid var(--separator); padding: 44px 0 52px; }
                 <p>Claude、GPT、Gemini、通义、豆包、Kimi 随手切换；一道题换个模型重解，对比着看谁讲得清楚。</p>
             </div>
         </div>
-        <p class="trust-strip"><b>开源免费</b><i>|</i><b>自带密钥</b>，用量自己掌控<i>|</i>跑在<b>你自己的电脑</b>上，截图只走局域网</p>
+        <p class="trust-strip"><span><b>开源免费</b>，Apache 2.0</span><i>|</i><span><b>自带密钥</b>，用量自己掌控</span><i>|</i><span>跑在<b>你自己的电脑</b>上，截图只走局域网</span></p>
     </div>
 </section>
 

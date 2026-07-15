@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零基础上手教程 — Snap-Solver</title>
+<meta name="description" content="从安装 Python 到手机上完成第一次解题，手把手带你跑起 Snap-Solver。面向没有编程经验的新手。">
+<style>
+:root {
+    --bg: #14110e;
+    --surface: #1f1b16;
+    --surface-2: #272119;
+    --edge: #332c22;
+    --separator: #2b251d;
+    --text: #ede6da;
+    --body: #d6cdbf;
+    --dim: #a79c8b;
+    --faint: #776d5e;
+    --accent: #3ec99a;
+    --on-accent: #10241c;
+    --accent-soft: rgba(62, 201, 154, 0.12);
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--body); line-height: 1.85; overflow-x: hidden; }
+::selection { background: var(--accent); color: var(--on-accent); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* 顶栏（与主页一致） */
+.topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(20, 17, 14, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--separator);
+}
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.wordmark { display: flex; align-items: center; gap: 10px; font: 700 17px/1 var(--sans); color: var(--text); }
+.wordmark:hover { text-decoration: none; }
+.glyph { width: 26px; height: 26px; border-radius: 8px; position: relative; background: var(--accent); box-shadow: 0 0 18px rgba(62,201,154,.35); }
+.glyph::before { content: ""; position: absolute; inset: 7px; border: 2.5px solid var(--on-accent); border-radius: 3px; }
+.top-gh {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 13px/1 var(--sans); color: var(--dim);
+    border: 1px solid var(--edge); border-radius: 999px;
+    padding: 9px 16px; transition: color .2s, border-color .2s;
+}
+.top-gh:hover { color: var(--text); border-color: var(--faint); text-decoration: none; }
+.top-gh svg { width: 15px; height: 15px; fill: currentColor; }
+
+/* 页头 */
+.doc-hero { padding: 64px 0 40px; border-bottom: 1px solid var(--separator); }
+.doc-eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .14em; color: var(--accent); display: block; margin-bottom: 14px; }
+.doc-hero h1 { font: 800 clamp(30px, 4vw, 44px)/1.25 var(--sans); color: var(--text); letter-spacing: -0.01em; margin-bottom: 14px; }
+.doc-hero p { color: var(--dim); font-size: 15.5px; max-width: 640px; text-wrap: pretty; }
+
+/* 双栏：目录 + 正文 */
+.doc-layout { display: grid; grid-template-columns: 240px 1fr; gap: 56px; padding: 48px 0 96px; align-items: start; }
+.toc { position: sticky; top: 84px; }
+.toc-title { font: 600 12px/1 var(--mono); letter-spacing: .12em; color: var(--faint); margin-bottom: 14px; }
+.toc a {
+    display: block; font-size: 13.5px; color: var(--dim);
+    padding: 6px 12px; border-left: 2px solid var(--separator);
+    transition: color .15s, border-color .15s;
+}
+.toc a:hover { color: var(--text); border-color: var(--faint); text-decoration: none; }
+.toc a.on { color: var(--accent); border-color: var(--accent); }
+
+article { min-width: 0; max-width: 720px; }
+article section { margin-bottom: 64px; scroll-margin-top: 84px; }
+.sec-num { font: 600 12px/1 var(--mono); color: var(--accent); letter-spacing: .1em; display: block; margin-bottom: 10px; }
+article h2 { font: 800 24px/1.35 var(--sans); color: var(--text); margin-bottom: 18px; letter-spacing: -0.01em; }
+article h3 { font: 700 16.5px/1.4 var(--sans); color: var(--text); margin: 28px 0 10px; }
+article p { margin-bottom: 14px; font-size: 15px; }
+article ul, article ol { margin: 0 0 14px; padding-left: 24px; font-size: 15px; }
+article li { margin-bottom: 8px; }
+article li::marker { color: var(--faint); }
+article b, article strong { color: var(--text); font-weight: 600; }
+article code {
+    font: 13px/1.6 var(--mono); color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--edge);
+    border-radius: 5px; padding: 1.5px 7px; white-space: nowrap;
+}
+pre {
+    background: #0e0c09; border: 1px solid var(--edge); border-radius: 12px;
+    padding: 16px 20px; margin: 6px 0 16px;
+    font: 13px/1.9 var(--mono); color: var(--body);
+    overflow-x: auto;
+}
+pre code { background: none; border: none; padding: 0; white-space: pre; color: inherit; }
+pre .c { color: var(--accent); }
+pre .m { color: var(--faint); }
+
+.tip {
+    background: var(--surface); border: 1px solid var(--edge);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 18px; margin: 18px 0;
+    font-size: 14px; color: var(--dim);
+}
+.tip b { color: var(--text); }
+.tip p:last-child { margin-bottom: 0; }
+
+.step-cards { display: grid; gap: 10px; margin-bottom: 14px; }
+.kv {
+    display: flex; gap: 14px; align-items: baseline;
+    background: var(--surface); border: 1px solid var(--edge);
+    border-radius: 12px; padding: 13px 16px; font-size: 14px;
+}
+.kv b { flex: none; color: var(--text); font-weight: 600; min-width: 88px; }
+.kv span { color: var(--dim); }
+
+.next-box {
+    margin-top: 8px;
+    background: linear-gradient(160deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--edge); border-radius: 18px;
+    padding: 28px 30px;
+}
+.next-box h3 { margin-top: 0; }
+.btn-solid {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--accent); color: var(--on-accent);
+    font: 700 14px/1 var(--sans);
+    border-radius: 999px; padding: 13px 24px; margin-top: 8px;
+    box-shadow: 0 6px 20px rgba(62,201,154,.25);
+    transition: transform .2s, background .2s;
+}
+.btn-solid:hover { transform: translateY(-2px); background: #4bd6a8; text-decoration: none; }
+
+footer { border-top: 1px solid var(--separator); padding: 36px 0 44px; }
+.foot-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 13px; color: var(--faint); }
+.foot-row a { color: var(--dim); }
+
+@media (max-width: 860px) {
+    .doc-layout { grid-template-columns: 1fr; gap: 36px; padding: 36px 0 72px; }
+    .toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+    .toc-title { width: 100%; }
+    .toc a { border: 1px solid var(--edge); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; }
+    .toc a.on { border-color: var(--accent); }
+    article code { white-space: normal; word-break: break-all; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+    <div class="wrap">
+        <a class="wordmark" href="./"><span class="glyph"></span>Snap-Solver</a>
+        <a class="top-gh" href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+        </a>
+    </div>
+</nav>
+
+<header class="doc-hero">
+    <div class="wrap">
+        <span class="doc-eyebrow">TUTORIAL · 约 20 分钟</span>
+        <h1>零基础上手教程</h1>
+        <p>面向第一次接触编程或 Python 的朋友，从安装环境开始，直到在手机上完成第一次解题。遇到困难就按章节逐步检查，或对照文末的常见问题排查。</p>
+    </div>
+</header>
+
+<div class="wrap doc-layout">
+    <aside class="toc">
+        <div class="toc-title">目录</div>
+        <a href="#t1">1 · 它是什么</a>
+        <a href="#t2">2 · 准备清单</a>
+        <a href="#t3">3 · 打开命令行</a>
+        <a href="#t4">4 · 安装 Python</a>
+        <a href="#t5">5 · 安装 Git（可选）</a>
+        <a href="#t6">6 · 获取代码</a>
+        <a href="#t7">7 · 安装依赖</a>
+        <a href="#t8">8 · 启动与访问</a>
+        <a href="#t9">9 · 配置密钥与设置</a>
+        <a href="#t10">10 · 申请 API Key</a>
+        <a href="#t11">11 · 第一次解题</a>
+        <a href="#t12">12 · 常见问题</a>
+        <a href="#t13">13 · 进一步探索</a>
+    </aside>
+
+    <article>
+        <section id="t1">
+            <span class="sec-num">01</span>
+            <h2>Snap-Solver 是什么？</h2>
+            <p>Snap-Solver 是一个在你自己电脑上运行的截屏解题工具。它的工作方式是「<b>手机遥控电脑</b>」：</p>
+            <ul>
+                <li>电脑上运行程序，手机浏览器打开页面；</li>
+                <li>手机上点一下 <b>截屏解题</b>，电脑自动截取它的整个屏幕并回传手机；</li>
+                <li>在手机上缩放、框选题目区域，交给你选择的 AI 模型；</li>
+                <li>AI 流式给出解答——推理模型的思考过程实时可见，答案支持公式和代码渲染；</li>
+                <li>答案没看懂，还可以<b>就这道题继续追问</b>。</li>
+            </ul>
+            <p>整个应用基于 Python + Flask，密钥和数据都只存在你的电脑上，不经过任何第三方服务器。</p>
+        </section>
+
+        <section id="t2">
+            <span class="sec-num">02</span>
+            <h2>准备清单</h2>
+            <ul>
+                <li>一台可以联网的 Windows、macOS 或 Linux 电脑，以及一部同一 Wi-Fi 下的手机；</li>
+                <li>至少一个可用的模型 API Key（推荐准备 2~3 个，方便切换），六选一即可：Anthropic（Claude）、OpenAI（GPT）、Google（Gemini）、阿里通义（Qwen）、字节豆包、Moonshot（Kimi）；</li>
+                <li>国内网络环境建议优先申请 <b>阿里通义 / 豆包 / Kimi</b>，无需代理即可直连；</li>
+                <li>约 2 GB 可用硬盘空间。</li>
+            </ul>
+            <div class="tip"><b>提示</b>：Snap-Solver 不依赖显卡或 GPU，普通轻薄本即可顺利运行。</div>
+        </section>
+
+        <section id="t3">
+            <span class="sec-num">03</span>
+            <h2>第一次打开命令行</h2>
+            <p>Snap-Solver 需要在命令行里执行几条简单的指令。命令行是一个黑色（或白色）窗口，通过输入文字来让电脑完成任务。不同系统打开方式略有区别：</p>
+            <h3>Windows</h3>
+            <ol>
+                <li>按 <code>Win + S</code>，输入 <code>cmd</code> 或 <code>terminal</code>，打开 <b>命令提示符</b> 或 <b>Windows Terminal</b>；</li>
+                <li>复制命令后在窗口里右键 → 粘贴，或 <code>Ctrl + V</code>；</li>
+                <li>切换到某个文件夹（例如 <code>D:\Snap-Solver</code>）：</li>
+            </ol>
+            <pre><code><span class="c">cd</span> /d D:\Snap-Solver</code></pre>
+            <h3>macOS</h3>
+            <ol>
+                <li>按 <code>Command + Space</code> 呼出 Spotlight，输入 <code>Terminal</code> 回车；</li>
+                <li>切换到项目目录（例如在「下载」文件夹内）：</li>
+            </ol>
+            <pre><code><span class="c">cd</span> ~/Downloads/Snap-Solver</code></pre>
+            <h3>Linux（Ubuntu 示例）</h3>
+            <pre><code><span class="c">cd</span> ~/Snap-Solver</code></pre>
+            <div class="tip">
+                <b>常用命令速记</b>：<code>cd 路径</code> 进入文件夹（路径有空格用双引号包住）；<code>dir</code>（Windows）/ <code>ls</code>（macOS、Linux）查看当前文件夹内容；按方向键 ↑ 调出上一条命令。
+            </div>
+        </section>
+
+        <section id="t4">
+            <span class="sec-num">04</span>
+            <h2>安装 Python 3</h2>
+            <p>Snap-Solver 基于 Python 3.9+，推荐 3.10 或 3.11。</p>
+            <h3>Windows</h3>
+            <ol>
+                <li>访问 <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a>，下载最新稳定版的 Windows 安装包；</li>
+                <li>双击安装，<b>务必勾选 Add Python to PATH</b>；</li>
+                <li>装完后打开命令行验证：</li>
+            </ol>
+            <pre><code><span class="c">python</span> --version
+<span class="c">pip</span> --version</code></pre>
+            <h3>macOS</h3>
+            <p>从 <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org</a> 下载 <code>.pkg</code> 安装包按提示安装，然后在终端验证（macOS 下命令用 <code>python3</code> / <code>pip3</code>）：</p>
+            <pre><code><span class="c">python3</span> --version
+<span class="c">pip3</span> --version</code></pre>
+            <h3>Linux（Ubuntu 示例）</h3>
+            <pre><code><span class="c">sudo apt</span> update
+<span class="c">sudo apt</span> install python3 python3-venv python3-pip -y</code></pre>
+        </section>
+
+        <section id="t5">
+            <span class="sec-num">05</span>
+            <h2>安装 Git（可选）</h2>
+            <p>Git 方便后续更新项目，也可以用来下载代码：</p>
+            <ul>
+                <li>Windows：<a href="https://git-scm.com/download/win" target="_blank" rel="noopener">git-scm.com/download/win</a></li>
+                <li>macOS：终端输入 <code>xcode-select --install</code></li>
+                <li>Linux：<code>sudo apt install git -y</code></li>
+            </ul>
+            <p>暂时不想装 Git 也没关系，下一步可以直接下载压缩包。</p>
+        </section>
+
+        <section id="t6">
+            <span class="sec-num">06</span>
+            <h2>获取 Snap-Solver 项目代码</h2>
+            <p>任选其一：</p>
+            <h3>方式一：Git 克隆（推荐）</h3>
+            <pre><code><span class="c">git clone</span> https://github.com/Zippland/Snap-Solver.git
+<span class="c">cd</span> Snap-Solver</code></pre>
+            <h3>方式二：下载压缩包</h3>
+            <ol>
+                <li>打开 <a href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">项目主页</a>，点 <code>Release</code> → <code>Source code (zip)</code>；</li>
+                <li>解压后把文件夹重命名为 <code>Snap-Solver</code> 并记住路径。</li>
+            </ol>
+            <p>后续步骤默认你已位于项目根目录（包含 <code>app.py</code>、<code>requirements.txt</code> 的文件夹）。</p>
+        </section>
+
+        <section id="t7">
+            <span class="sec-num">07</span>
+            <h2>创建虚拟环境并安装依赖</h2>
+            <p>虚拟环境可以把项目依赖和系统环境隔离，避免冲突。</p>
+            <h3>创建并激活虚拟环境</h3>
+            <p>Windows PowerShell：</p>
+            <pre><code><span class="c">python</span> -m venv .venv
+.\.venv\Scripts\Activate</code></pre>
+            <p>macOS / Linux：</p>
+            <pre><code><span class="c">python3</span> -m venv .venv
+<span class="c">source</span> .venv/bin/activate</code></pre>
+            <p>激活成功后，命令行前面会出现 <code>(.venv)</code> 前缀。关掉窗口后需要重新进入项目目录并再次激活。</p>
+            <h3>安装依赖</h3>
+            <pre><code><span class="c">pip install</span> --upgrade pip
+<span class="c">pip install</span> -r requirements.txt</code></pre>
+            <div class="tip"><b>如果安装超时</b>：可以临时用清华镜像源 <code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt</code>。</div>
+        </section>
+
+        <section id="t8">
+            <span class="sec-num">08</span>
+            <h2>首次启动与访问</h2>
+            <ol>
+                <li>确保虚拟环境处于激活状态；</li>
+                <li>在项目根目录执行：</li>
+            </ol>
+            <pre><code><span class="c">python</span> app.py
+<span class="m">→ Running on http://192.168.1.8:5000</span></code></pre>
+            <ol start="3">
+                <li>终端出现 <code>Running on http://...:5000</code> 即启动成功（5000 被占用时会自动改用 5001，以终端打印的地址为准）；</li>
+                <li>手机与电脑连<b>同一 Wi-Fi</b>，手机浏览器输入终端里打印的地址即可打开。电脑重连网络后 IP 可能变化，连不上时回终端重新确认。</li>
+            </ol>
+            <div class="tip"><b>暂停服务</b>：在终端按 <code>Ctrl + C</code>。再次启动只需重新激活虚拟环境并执行 <code>python app.py</code>。</div>
+        </section>
+
+        <section id="t9">
+            <span class="sec-num">09</span>
+            <h2>配置 API 密钥与基础设置</h2>
+            <h3>首次打开：跟着引导走</h3>
+            <p>第一次在手机上打开页面，会看到一段工作机制说明，点 <b>「知道了，去选模型」</b> 直接进入模型选择页：</p>
+            <ol>
+                <li>顶部横排是六家厂商的标签（带小圆点的表示还没配密钥）；</li>
+                <li>选中你有密钥的厂商，页面顶部会出现<b>密钥填写卡</b>——粘贴密钥、点保存即可；</li>
+                <li>卡片右上角有 <b>「如何获取」</b> 链接，直达该厂商的密钥申请页面；</li>
+                <li>在「全部模型」列表里点选一个模型，<b>选择即生效</b>。</li>
+            </ol>
+            <p>之后想换模型或换密钥：点首页底部的<b>模型卡片</b>随时进入这个页面；已配的密钥会沉底显示，点「修改」可以更换（<b>清空后保存 = 删除该密钥</b>）。</p>
+            <h3>设置页一览</h3>
+            <p>点右上角的齿轮进入设置，共三组：</p>
+            <div class="step-cards">
+                <div class="kv"><b>解题</b><span>提示词模式（内置多种，也可自建）、回复语言</span></div>
+                <div class="kv"><b>模型接入</b><span>API 密钥集中管理、网络（代理与中转）</span></div>
+                <div class="kv"><b>通用</b><span>外观（浅色/深色/跟随系统）、GitHub 仓库、关于与检查更新</span></div>
+            </div>
+            <p>所有密钥只保存在你电脑的 <code>.snapsolver/api_keys.json</code> 里（该目录已被 git 忽略，不会被误提交）。</p>
+            <h3>设置代理与中转（可选）</h3>
+            <p>在 <b>设置 → 网络</b> 中：</p>
+            <ul>
+                <li><b>HTTP 代理</b>：打开开关，填本地代理的主机和端口（如 <code>127.0.0.1</code> / <code>7890</code>），用于访问 Anthropic、OpenAI、Google 等国际 API；</li>
+                <li><b>中转 API 地址</b>：每家厂商单独一栏，填了即走中转，留空走官方地址；</li>
+                <li>修改立即生效，无需重启应用。</li>
+            </ul>
+            <h3>如何确认 VPN / 代理端口</h3>
+            <p>很多加速器或 VPN 客户端会在本地启动一个「系统代理」服务（常见端口如 <code>7890</code>、<code>1080</code>）。找端口的常见途径：</p>
+            <ul>
+                <li>打开 VPN 客户端设置，找「本地监听端口」「HTTP(S) 代理」「SOCKS 代理」等字样；</li>
+                <li>Windows：「设置 → 网络和 Internet → 代理」查看代理服务器地址和端口；</li>
+                <li>macOS：「系统设置 → 网络 → Wi-Fi → 详情 → 代理」查看勾选的服务和端口。</li>
+            </ul>
+            <p>拿到端口后，在 Snap-Solver 的代理设置里填 <code>127.0.0.1</code> 和对应端口即可。</p>
+        </section>
+
+        <section id="t10">
+            <span class="sec-num">10</span>
+            <h2>获取常用 API Key</h2>
+            <p>API Key 相当于你在各大模型平台上的「门票」。申请过程中务必保护好账号安全，切勿向他人泄露密钥。</p>
+            <h3>Anthropic（Claude 系列）</h3>
+            <ol>
+                <li>打开 <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a> 注册账号，完成手机验证与支付绑定；</li>
+                <li>进入 <code>API Keys</code> 页面 → <code>Create Key</code>；</li>
+                <li>复制生成的密钥（形如 <code>sk-ant-...</code>），在模型页选择 Anthropic 后粘贴保存。</li>
+            </ol>
+            <h3>OpenAI（GPT 系列）</h3>
+            <ol>
+                <li>打开 <a href="https://platform.openai.com/" target="_blank" rel="noopener">platform.openai.com</a> 注册登录，完成支付方式绑定；</li>
+                <li>进入 <code>API keys</code> → <code>Create new secret key</code>；</li>
+                <li>复制密钥（形如 <code>sk-...</code>），在模型页选择 OpenAI 后粘贴保存。</li>
+            </ol>
+            <h3>Google Gemini</h3>
+            <ol>
+                <li>前往 <a href="https://ai.google.dev/" target="_blank" rel="noopener">ai.google.dev</a> 登录 Google 账号；</li>
+                <li>点 <code>Get API key</code>，选择或创建项目生成密钥（形如 <code>AIza...</code>）；</li>
+                <li>在模型页选择 Google 后粘贴保存。</li>
+            </ol>
+            <h3>阿里通义（Qwen / QVQ，国内直连）</h3>
+            <ol>
+                <li>打开 <a href="https://dashscope.console.aliyun.com/" target="_blank" rel="noopener">dashscope.console.aliyun.com</a>，用阿里云账号登录；</li>
+                <li>进入「API Key 管理」→ <code>创建 API Key</code>；</li>
+                <li>复制密钥，在模型页选择通义后粘贴保存。收费模型需先实名认证并开通计费。</li>
+            </ol>
+            <h3>字节豆包（火山方舟，国内直连）</h3>
+            <ol>
+                <li>打开 <a href="https://console.volcengine.com/ark" target="_blank" rel="noopener">console.volcengine.com/ark</a> 注册登录并完成实名认证；</li>
+                <li>在「API Key 管理」中创建 API Key；</li>
+                <li>复制密钥，在模型页选择豆包后粘贴保存。</li>
+            </ol>
+            <h3>Moonshot Kimi（国内直连）</h3>
+            <ol>
+                <li>打开 <a href="https://platform.moonshot.cn/" target="_blank" rel="noopener">platform.moonshot.cn</a> 注册登录；</li>
+                <li>进入「API Key 管理」→ <code>新建</code>；</li>
+                <li>复制密钥（形如 <code>sk-...</code>），在模型页选择 Kimi 后粘贴保存。</li>
+            </ol>
+            <div class="tip">
+                <b>安全小贴士</b>：API Key 和密码一样重要，泄露后他人可能代你调用接口、消耗额度。建议为不同用途创建多个密钥，定期检查和撤销不用的密钥；平台支持额度上限的可以酌情启用。
+            </div>
+        </section>
+
+        <section id="t11">
+            <span class="sec-num">11</span>
+            <h2>完成第一次题目解析</h2>
+            <ol>
+                <li>电脑上把题目显示在屏幕上（网页、PDF、课件都可以）；</li>
+                <li>手机页面左上角确认显示绿色的 <b>「已连接 · 电脑端」</b>；</li>
+                <li>手机上点大圆按钮 <b>「截屏解题」</b>——电脑自动截取整个屏幕并回传到手机；</li>
+                <li>在手机上<b>双指缩放、拖动框选</b>题目区域（右上角实时显示所选区域的像素尺寸），点 <b>「发送解题」</b>；</li>
+                <li>解答页会依次出现：<b>思考过程</b>（淡色小字实时展开，结束自动收起，点击可重新展开）→ <b>最终答案</b>（Markdown 渲染，公式清晰、代码块可一键复制）。生成中可随时点右上角停止；</li>
+                <li>答案出来之后：
+                    <ul>
+                        <li>没看懂？在底部输入框<b>就这道题继续追问</b>，AI 会带着题目图片和之前的问答继续回答（换题或返回后自动清空）；</li>
+                        <li>想换个角度？答案下方有 <b>重解 / 换模型重解 / 复制</b> 三个快捷操作；</li>
+                        <li>继续刷题：返回首页再点「截屏解题」，上一次的框选位置会自动保留。</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="tip"><b>小技巧</b>：点解答页顶部的题目缩略图可以全屏对照原题；终端会实时输出请求日志，方便排查问题。</div>
+        </section>
+
+        <section id="t12">
+            <span class="sec-num">12</span>
+            <h2>常见问题速查</h2>
+            <ul>
+                <li><b><code>python</code> 命令找不到</b>：Windows 重开终端或重启电脑，或改用 <code>py</code>；macOS / Linux 用 <code>python3</code>。</li>
+                <li><b><code>pip install</code> 超时</b>：临时用清华源 <code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt</code>。</li>
+                <li><b>启动后网页打不开</b>：确认终端没有报错；检查防火墙、端口占用（5000 被占用时自动改用 5001，以终端打印的地址为准），或试 <code>http://127.0.0.1:5000</code>。</li>
+                <li><b>截图没反应 / 截出来是黑屏</b>：macOS 需在「系统设置 → 隐私与安全性 → 屏幕录制」中勾选终端（或运行 Python 的应用）并重启程序；Windows 一般无需额外授权。</li>
+                <li><b>模型报 401 / 403</b>：检查 API Key 是否正确、账号余额是否充足，必要时换模型或配置中转地址。</li>
+                <li><b>手机访问失败</b>：确保手机和电脑在同一个 Wi-Fi 下，且电脑未开启导致局域网隔离的 VPN。</li>
+            </ul>
+        </section>
+
+        <section id="t13">
+            <span class="sec-num">13</span>
+            <h2>进一步探索</h2>
+            <ul>
+                <li><b>自建提示词</b>：设置 → 解题 → 提示词模式 → 新建，可为特定学科定制解题风格（存放在 <code>.snapsolver/prompts.json</code>）；</li>
+                <li><b>推理档位</b>：模型页当前模型卡上的 Fast / High / Max 三档，全局统一，复杂题目调高档位效果更好；</li>
+                <li><b><code>config/models.json</code></b>：模型列表的配置文件，进阶用户可按需增删模型；</li>
+                <li><b>更新项目</b>：Git 克隆的执行 <code>git pull</code>；压缩包用户重新下载覆盖。应用内「设置 → 关于 → 检查更新」也会提示新版本。</li>
+            </ul>
+            <div class="next-box">
+                <h3>都跑通了？</h3>
+                <p>你已经具备日常使用 Snap-Solver 的全部基础。有新需求或遇到解决不了的问题，欢迎到仓库提 Issue。</p>
+                <a class="btn-solid" href="https://github.com/Zippland/Snap-Solver" target="_blank" rel="noopener">前往 GitHub 仓库</a>
+            </div>
+        </section>
+    </article>
+</div>
+
+<footer>
+    <div class="wrap foot-row">
+        <span>© 2026 Zippland · <a href="https://github.com/Zippland/Snap-Solver/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a></span>
+        <span><a href="./">返回首页</a> · <a href="https://github.com/Zippland/Snap-Solver/issues" target="_blank" rel="noopener">问题反馈</a></span>
+    </div>
+</footer>
+
+<script>
+// 目录高亮跟随滚动
+(function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var secs = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) {
+                    links.forEach(function (a) { a.classList.remove('on'); });
+                    var i = secs.indexOf(en.target);
+                    if (links[i]) links[i].classList.add('on');
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+        secs.forEach(function (s) { s && io.observe(s); });
+    }
+})();
+</script>
+
+</body>
+</html>
